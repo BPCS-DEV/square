@@ -39,24 +39,11 @@ class square(object):
         return len(empty)
         
         
-    def tabletotext(self):
-        o="\n."+"."*11*self.x+"\n:"
-        for i in self.box:
-            f=" "*10+":"
-            o+=f*4+"\n:"
-            for e in i:
-                o+="{:^10s}".format(str(e))+":"
-            o+="\n:"+f*4+"\n"
-            o+=":"+"."*11*self.x+"\n:"
-        o= re.sub(" 0 ", "   ", o)
-        o=o[:-1]
-        stdscr.addstr(0, 0, o)
-    
             
     def addentry(self):
         elementnumber=random.randint(0,len(self.emptyCells)-1)
         randombox=self.emptyCells[elementnumber]
-        self.box[randombox[0]][randombox[1]]=getRandomNumber()
+        self.box[randombox[0]][randombox[1]]=self.getRandomNumber()
         del(self.emptyCells[elementnumber])
     
     
@@ -88,108 +75,97 @@ class square(object):
             if m==ll-1:
                 break
         return liste
-            
+      
     
-
-    def left(self):
+    def moveHori(self,direction):
         for i in range(0,len(self.box)):
-            line=self.box[i]
-            m=self.moveLeft(line)
+            m=self.box[i]
+                     
+            if direction == "right":
+                m=self.inverteList(m)        
+            
+            m=self.moveLeft(m)
             m=self.uniteLeft(m)
             m=self.moveLeft(m)
+            
+            if direction == "right":
+                m=self.inverteList(m)        
+            
             self.box[i]=m
-  
-    def right(self):
-        for i in range(0,len(self.box)):
-            line=self.box[i]
-            line=self.inverteList(line)
-            
-            m=self.moveLeft(line)
-            m=self.uniteLeft(m)
-            m=self.moveLeft(m)
-            
-            self.box[i]=self.inverteList(m)
-            
-    def up(self):
+     
+    def moveVert(self,direction):
         zipped=[]
         for i in zip(*self.box):
             i=list(i)
-            #print i
+            
+            if direction == "down":
+                i=self.inverteList(i)
+                
             m=self.moveLeft(i)
             m=self.uniteLeft(m)
             m=self.moveLeft(m)
-            zipped.append(m)
-        k=[]
-        for i in zip(*zipped):
-            k.append(list(i))
+            
+            if direction == "down":
+                zipped.append(self.inverteList(m))
+            else:
+                zipped.append(m)
+                
+            k=[]
+            for i in zip(*zipped):
+                k.append(list(i))
         
         for i in range(0,len(k)):
             self.box[i]=k[i]
-        
-            
-    def down(self):
-        zipped=[]
-        for i in zip(*self.box):
-            i=list(i)
-            i=self.inverteList(i)
-            m=self.moveLeft(i)
-            m=self.uniteLeft(m)
-            m=self.moveLeft(m)
-            zipped.append(self.inverteList(m))
-            
-        k=[]
-        for i in zip(*zipped):
-            k.append(list(i))
-        
-        for i in range(0,len(k)):
-            self.box[i]=k[i]
-            
+    
         
     def inverteList(self,liste):
         return liste[::-1]
     
-        
-        
-        
     
-def getRandomNumber():
-    return validValues[random.randint(0,len(validValues)-1)]
+    def getRandomNumber(self):
+        return validValues[random.randint(0,len(validValues)-1)]
 
 
-
+    def tabletotext(self):
+        o="\n."+"."*11*self.x+"\n:"
+        for i in self.box:
+            f=" "*10+":"
+            o+=f*4+"\n:"
+            for e in i:
+                o+="{:^10s}".format(str(e))+":"
+            o+="\n:"+f*4+"\n"
+            o+=":"+"."*11*self.x+"\n:"
+        o= re.sub(" 0 ", "   ", o)
+        o=o[:-1]
+        stdscr.addstr(0, 0, o)
 
 
 
 def main():
-    z=square(4,4)
-    z.addentry()
-    z.tabletotext()
+    z=square(4,4)  # build internal structure
+    z.addentry()   # add first random entry
+    z.tabletotext() # print
     
     
-    curses.cbreak()
+    curses.cbreak() 
     stdscr.keypad(1)
 
     stdscr.addstr(0,10,"Hit 'q' to quit")
     stdscr.refresh()
 
     key = ''
-
     while key != ord('q'):
         key = stdscr.getch()
         stdscr.addch(20,25,key)
         stdscr.refresh()
         if key == curses.KEY_UP: 
-            z.up()
-
-            #stdscr.addstr(2, 20, "Up")
+            z.moveVert("up")
         elif key == curses.KEY_DOWN: 
-            z.down()
-
-            #stdscr.addstr(3, 20, "Down")
+            z.moveVert("down")
         elif key == curses.KEY_LEFT: 
-            z.left()
+            z.moveHori("left")
         elif key == curses.KEY_RIGHT: 
-            z.right()
+            z.moveHori("right")
         if z.checkEmptyCells() == 0:
             break
 
@@ -199,9 +175,6 @@ def main():
         z.tabletotext() 
 
         stdscr.refresh()
-
-
-
     curses.endwin()
 
 if __name__=="__main__":
