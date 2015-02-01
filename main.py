@@ -2,9 +2,13 @@
 import random
 
 import curses
+import re
+
+
 
 
 validValues=[2,2,4]
+stdscr = curses.initscr()
 
 class square(object):
     
@@ -13,20 +17,16 @@ class square(object):
         self.y=yspace
         self.emptyCells=[] 
         self.moved=0
+
         arry=[]
         empty=[]
         for ycell in range(0,yspace):
             arrx=[]
             for xcell in range(0,xspace):
-                empty.append([ycell,xcell])
                 arrx.append(0)
             arry.append(arrx)
-
-        self.emptyCells=empty
-        
-        #print arry[emptyCells[13][0]][emptyCells[13][1]]
-        
         self.box=arry
+        self.checkEmptyCells()
 
     def checkEmptyCells(self):
         empty=[]
@@ -35,16 +35,21 @@ class square(object):
             for xcell in range(0,self.x):
                 if A[ycell][xcell]==0:
                     empty.append([ycell,xcell])
-                
-            
         self.emptyCells=empty
         return len(empty)
         
         
     def tabletotext(self):
-        o=""
+        o="\n."+"."*11*self.x+"\n:"
         for i in self.box:
-            o+=str(i)+"\n"
+            f=" "*10+":"
+            o+=f*4+"\n:"
+            for e in i:
+                o+="{:^10s}".format(str(e))+":"
+            o+="\n:"+f*4+"\n"
+            o+=":"+"."*11*self.x+"\n:"
+        o= re.sub(" 0 ", "   ", o)
+        o=o[:-1]
         stdscr.addstr(0, 0, o)
     
             
@@ -151,50 +156,57 @@ def getRandomNumber():
     return validValues[random.randint(0,len(validValues)-1)]
 
 
-stdscr = curses.initscr()
-curses.cbreak()
-stdscr.keypad(1)
-
-stdscr.addstr(0,10,"Hit 'q' to quit")
-stdscr.refresh()
-
-key = ''
 
 
 
 
-z=square(4,4)
-z.addentry()
-z.tabletotext()
-
-while key != ord('q'):
-    key = stdscr.getch()
-    stdscr.addch(20,25,key)
-    stdscr.refresh()
-    if key == curses.KEY_UP: 
-        z.up()
-        
-        #stdscr.addstr(2, 20, "Up")
-    elif key == curses.KEY_DOWN: 
-        z.down()
-        
-        #stdscr.addstr(3, 20, "Down")
-    elif key == curses.KEY_LEFT: 
-        z.left()
-    elif key == curses.KEY_RIGHT: 
-        z.right()
-    if z.checkEmptyCells() == 0:
-        break
+def main():
+    z=square(4,4)
+    z.addentry()
+    z.tabletotext()
     
-    if z.moved==1:
-        z.addentry()
-    z.moved=0
-    z.tabletotext() 
     
+    curses.cbreak()
+    stdscr.keypad(1)
+
+    stdscr.addstr(0,10,"Hit 'q' to quit")
     stdscr.refresh()
 
-        
+    key = ''
 
-curses.endwin()
+    while key != ord('q'):
+        key = stdscr.getch()
+        stdscr.addch(20,25,key)
+        stdscr.refresh()
+        if key == curses.KEY_UP: 
+            z.up()
+
+            #stdscr.addstr(2, 20, "Up")
+        elif key == curses.KEY_DOWN: 
+            z.down()
+
+            #stdscr.addstr(3, 20, "Down")
+        elif key == curses.KEY_LEFT: 
+            z.left()
+        elif key == curses.KEY_RIGHT: 
+            z.right()
+        if z.checkEmptyCells() == 0:
+            break
+
+        if z.moved==1:
+            z.addentry()
+        z.moved=0
+        z.tabletotext() 
+
+        stdscr.refresh()
+
+
+
+    curses.endwin()
+
+if __name__=="__main__":
+    main()
+
+
 
 
