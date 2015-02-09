@@ -5,18 +5,16 @@ import curses
 import re
 
 
-
-
-validValues=[2,2,4]
-stdscr = curses.initscr()
-
 class square(object):
-    
+    def __dir__(self):
+            return ['__init__', 'addentry', 'tabletotext']
+        
     def __init__(self,xspace,yspace):
         self.x=xspace
         self.y=yspace
         self.emptyCells=[] 
         self.moved=0
+        self.validValues=[2,2,4]
 
         arry=[]
         empty=[]
@@ -97,23 +95,18 @@ class square(object):
         zipped=[]
         for i in zip(*self.box):
             i=list(i)
-            
             if direction == "down":
                 i=self.inverteList(i)
-                
             m=self.moveLeft(i)
             m=self.uniteLeft(m)
             m=self.moveLeft(m)
-            
             if direction == "down":
                 zipped.append(self.inverteList(m))
             else:
                 zipped.append(m)
-                
             k=[]
             for i in zip(*zipped):
                 k.append(list(i))
-        
         for i in range(0,len(k)):
             self.box[i]=k[i]
     
@@ -121,10 +114,8 @@ class square(object):
     def inverteList(self,liste):
         return liste[::-1]
     
-    
     def getRandomNumber(self):
-        return validValues[random.randint(0,len(validValues)-1)]
-
+        return self.validValues[random.randint(0,len(self.validValues)-1)]
 
     def tabletotext(self):
         o="\n."+"."*11*self.x+"\n:"
@@ -137,15 +128,16 @@ class square(object):
             o+=":"+"."*11*self.x+"\n:"
         o= re.sub(" 0 ", "   ", o)
         o=o[:-1]
-        stdscr.addstr(0, 0, o)
-
+        return o
 
 
 def main():
+    stdscr = curses.initscr()
+
+
     z=square(4,4)  # build internal structure
     z.addentry()   # add first random entry
-    z.tabletotext() # print
-    
+    stdscr.addstr(0, 0, z.tabletotext()) # print
     
     curses.cbreak() 
     stdscr.keypad(1)
@@ -172,7 +164,7 @@ def main():
         if z.moved==1:
             z.addentry()
         z.moved=0
-        z.tabletotext() 
+        stdscr.addstr(0, 0, z.tabletotext()) # print
 
         stdscr.refresh()
     curses.endwin()
